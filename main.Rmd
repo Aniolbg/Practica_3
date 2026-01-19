@@ -1,0 +1,83 @@
+---
+title: "Main"
+author: "Aniol, Omar, Marcel"
+date: "2026-01-19"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## 2. Análisis de logs de servidor usando R (parte II)
+
+### Obtención y carga de los Datos:
+
+Queremos programar un script con el que podamos hacer una investigación forense sobre un fichero de logs de un servidor de tipo Apache. Los datos del registro del servidor están en el formato estándar e incluyen miles de registros sobre las distintas peticiones gestionadas por el servidor web.
+
+Nuestro programa ha de ser capaz de obtener las respuestas de forma dinámica a las siguientes preguntas utilizando instrucciones de código en R:
+
+**1. Descomprimir el fichero comprimido que contiene los registros del servidor, y a partir de los datos extraídos, cargar en data frame los registros con las peticiones servidas.**
+
+```{r}
+summary(cars)
+```
+
+**2. Incluid en el documento un apartado con la descripción de los datosanalizados: fuente, tipología, descripción de la información contenida (los diferentes campos) y sus valores.**
+
+```{r}
+summary(cars)
+```
+
+### Limpieza de los Datos
+
+**3. Aprovechando que los datos a analizar son los mismos de la primera práctica, para esta entrega es imprescindible que los datos estén en formato de “datos elegantes”.**
+
+```{r}
+summary(cars)
+```
+
+### Exploración de Datos
+
+**4. Identificar el número único de usuarios que han interactuado directamente con el servidor de forma segregada según si los usuarios han tenido algún tipo de error en las distintas peticiones ofrecidas por el servidor.**
+
+```{r}
+summary(cars)
+```
+
+### Análisis de Datos
+**5. Analizar los distintos tipos de peticiones HTTP (GET, POST, PUT, DELETE) gestionadas por el servidor, identificando la frecuencia de cada una de estas. Repetir el análisis, esta vez filtrando previamente aquellas peticiones correspondientes a recursos ofrecidos de tipo imagen.**
+
+```{r}
+summary(cars)
+```
+
+### Visualización de Resultados
+
+**6. Generar al menos 2 gráficos distintos que permitan visualizar alguna característica relevante de los datos analizados.**
+
+**Estos deberán representar por lo menos 1 o 2 variables diferentes del data frame. Describid el gráfico e indicad cualquier observación destacable que se pueda apreciar gracias a la representación gráfica.**
+
+```{r}
+summary(cars)
+```
+
+**7. Generar un gráfico que permita visualizar el número de peticiones servidas a lo largo del tiempo**
+
+```{r}
+summary(cars)
+```
+
+## Clústering de datos
+
+**8. Utilizando un algoritmo de aprendizaje no supervisado, realizad un análisis de clústering con k-means para los datos del servidor.**
+
+```{r}
+summary(cars)
+```
+
+**9. Representad visualmente en gráficos de tipo scatter plot el resultado de vuestros clústering y interpretad el resultado obtenido **
+
+```{r}
+summary(cars)
+```
