@@ -152,9 +152,18 @@ df_4 <- logs %>% group_by(status) %>% count(status)
  - status: one hot encoding
  - size: use (log scale ? + normalize 0 1) + discard NA
 
-```{r}
+```{r warning=FALSE}
 
+df <- tidyr::separate(
+  logs, 
+  resource, 
+  c("resource_1", "type"), 
+  sep="(?=\\.[^.]+$)", 
+  remove = FALSE, 
+  extra = "merge", 
+  fill = "right")
 
+df$type[is.na(df$type)] <- "None"
 
 
 
