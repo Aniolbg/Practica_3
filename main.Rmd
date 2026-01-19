@@ -7,6 +7,11 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+# install.packages("tidyr")
+
+library(dplyr)
+library(tidyr)
+library(stringr)
 ```
 
 ## 2. Análisis de logs de servidor usando R (parte II)
@@ -22,16 +27,21 @@ knitr::opts_chunk$set(echo = TRUE)
 > Descomprimir el fichero comprimido que contiene los registros del servidor, y a partir de los datos extraídos, cargar en data frame los registros con las peticiones servidas.
 
 ```{r}
+logs <- read.table("epa-http.csv",
+                   header = FALSE,
+                   sep = " ",
+                   quote = "\"",
+                   stringsAsFactors = FALSE,
+                   fill = TRUE)
+
 
 ```
 
 #### 2.
 
-> Incluid en el documento un apartado con la descripción de los datosanalizados: fuente, tipología, descripción de la información contenida (los diferentes campos) y sus valores.\*\*
+> Incluid en el documento un apartado con la descripción de los datosanalizados: fuente, tipología, descripción de la información contenida (los diferentes campos) y sus valores.
 
-```{r}
-
-```
+TODO: explicación
 
 ### Limpieza de los Datos
 
@@ -42,6 +52,20 @@ knitr::opts_chunk$set(echo = TRUE)
 > Esto incluye la correcta codificación de cada columna de los datos en el tipo adecuado según su naturaleza (numérico, cadena de caracteres, lógico, timestamp, factor, etc.). Además, para esta entrega se valorará también que los datos estén limpios y sin elementos extraños como por ejemplo espacios o signos de puntuación no necesarios.
 
 ```{r}
+
+colnames(logs) <- c("host", "timestamp", "resource", "status", "size")
+
+logs$timestamp <- gsub("\\[", "", logs$timestamp)
+logs$timestamp <- gsub("]$", "", logs$timestamp)
+logs$status <- as.integer(logs$status)
+suppressWarnings(
+logs$size <- as.integer(logs$size)
+)
+
+logs <- tidyr::separate(logs, resource, c("method", "resource", "protocol"), sep = " ")
+
+head(logs)
+
 
 ```
 
