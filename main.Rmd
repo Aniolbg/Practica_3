@@ -165,7 +165,7 @@ df <- tidyr::separate(
 
 df$type[is.na(df$type)] <- "None"
 
-
+print(logs$resource[258])
 
 
 ```
