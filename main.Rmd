@@ -157,6 +157,17 @@ head(df_5_2)
 > Estos deberán representar por lo menos 1 o 2 variables diferentes del data frame. Describid el gráfico e indicad cualquier observación destacable que se pueda apreciar gracias a la representación gráfica.
 
 ```{r}
+df_summary <- logs %>% count(method, status)
+ggplot(df_summary, aes(x = method, y = n, fill = status)) +
+  geom_col(position = "dodge") +
+  scale_y_log10() +
+  labs(
+    title = "Número de status por método",
+    x = "Método",
+    y = "Cantidad",
+    fill = "Status"
+  ) +
+  theme_minimal()
 
 ```
 
@@ -281,6 +292,11 @@ df <- df %>% drop_na()
 
 
 ```{r}
+SEED <- 3
+
+set.seed(SEED)
+
+
 k <- 3
 results <- kmeans(df, centers = k, nstart = 25)
 
@@ -300,10 +316,14 @@ results[2]
 
 Queremos visualizar: 
 
- - Size vs status code
  - Type (images) vs Size
+ - Size vs status code
  - Method vs size
 
 ```{r}
+
+
+
+
 
 ```
