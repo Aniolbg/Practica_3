@@ -34,7 +34,7 @@ library(ggplot2)
 
 > Descomprimir el fichero comprimido que contiene los registros del servidor, y a partir de los datos extraídos, cargar en data frame los registros con las peticiones servidas.
 
-```{r}
+```{r, cache=TRUE}
 logs <- read.table("epa-http.csv",
                    header = FALSE,
                    sep = " ",
@@ -59,7 +59,7 @@ TODO: explicación
 >
 > Esto incluye la correcta codificación de cada columna de los datos en el tipo adecuado según su naturaleza (numérico, cadena de caracteres, lógico, timestamp, factor, etc.). Además, para esta entrega se valorará también que los datos estén limpios y sin elementos extraños como por ejemplo espacios o signos de puntuación no necesarios.
 
-```{r}
+```{r, cache=TRUE}
 
 colnames(logs) <- c("host", "timestamp", "resource", "status", "size")
 
@@ -279,13 +279,11 @@ df <- df %>% drop_na()
 
 ```
 
-
 ```{r}
 k <- 3
 results <- kmeans(df, centers = k, nstart = 25)
 
 ```
-
 
 ```{r}
 results[2]
@@ -298,12 +296,40 @@ results[2]
 >
 > (describid las características de los distintos grupos) con los 2 valores distintos de k probados en el apartado anterior en función de los valores de las variables y el número de clúster asignado.
 
-Queremos visualizar: 
+Queremos visualizar:
 
- - Size vs status code
- - Type (images) vs Size
- - Method vs size
+-   Size vs status code
+-   Type (images) vs Size
+-   Method vs size
 
 ```{r}
+
+df$group <- results[1]
+
+tmp <- df[df$group == 1]
+```
+
+```{r}
+
+# extensions_imatge <- c("jpg", "jpeg", "png", "gif", "bmp", "svg", "ico", "GIF")
+is_image_idx <- df$type_.jpg == 1 |
+  df$type_.JPG == 1 |
+  df$type_.gif == 1 |
+  df$type_.GIF == 1 |
+  df$type_.ico == 1
+
+df$is_image <- is_image_idx
+
+par(mfrow = c(1, 3))
+
+palette = c("red", "green", "blue")
+
+for (i in 1:k) {
+  current = df[df$group == i]
+  label = sprintf("From group %d, is an image?", i)
+  boxplot(size ~ is_image, data = df, xlab = label, col = palette[i])
+}
+
+
 
 ```
