@@ -98,8 +98,8 @@ head(logs)
 
 ```{r}
 
-df_4 <- logs %>% group_by(status) %>% count(status)
-# TODO
+df_4 <- logs %>% group_by(status) %>% summarise(comptador = n()) %>% arrange(desc(comptador))
+head(df_4)
 
 ```
 
@@ -164,6 +164,7 @@ df <- tidyr::separate(
   fill = "right")
 
 df$type[is.na(df$type)] <- "None"
+df$type <- as.factor(df$type)
 
 print(logs$resource[258])
 
