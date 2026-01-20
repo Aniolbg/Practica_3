@@ -135,7 +135,7 @@ Para esta version hemos creado un data frame que tiene como variable el tipo de 
 
 ```{r}
 imatges <- logs %>% mutate(extensio = str_extract(resource, "(?<=\\.)[^\\.]+$"))
-extensions_imatge <- c("jpg", "jpeg", "png", "gif", "bmp", "svg", "ico")
+extensions_imatge <- c("jpg", "jpeg", "png", "gif", "bmp", "svg", "ico", "GIF")
 imatges <- imatges %>%
   filter(extensio %in% extensions_imatge)
 
@@ -257,13 +257,20 @@ Ahora processamos **method** y **status**. Para transformarlos a datos numérico
 ```{r}
 
 
-# one_hot(df, cols = "method")
-one_hot_method <- model.matrix(~ method - 1, df)
-one_hot_method <- as.data.frame(one_hot_method) 
+df <- data.table(df)
 
-# one_hot(df, cols = "status")
-one_hot_status <- model.matrix(~ status - 1, df)
-one_hot_status <- as.data.frame(one_hot_status) 
+df <- one_hot(df, cols = "method")
+# one_hot_method <- model.matrix(~ method - 1, df)
+# one_hot_method <- as.data.frame(one_hot_method) 
+
+df <- one_hot(df, cols = "status")
+# one_hot_status <- model.matrix(~ status - 1, df)
+# one_hot_status <- as.data.frame(one_hot_status) 
+
+df <- one_hot(df, cols = "type")
+# one_hot_type <- model.matrix(~ type - 1, df)
+# one_hot_type <- as.data.frame(one_hot_type) 
+
 
 
 
