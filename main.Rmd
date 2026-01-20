@@ -98,8 +98,8 @@ head(logs)
 
 ```{r}
 
-df_4 <- logs %>% group_by(status) %>% count(status)
-# TODO
+df_4 <- logs %>% group_by(status) %>% summarise(comptador = n()) %>% arrange(desc(comptador))
+head(df_4)
 
 ```
 
@@ -110,9 +110,24 @@ df_4 <- logs %>% group_by(status) %>% count(status)
 > Analizar los distintos tipos de peticiones HTTP (GET, POST, PUT, DELETE) gestionadas por el servidor, identificando la frecuencia de cada una de estas. Repetir el análisis, esta vez filtrando previamente aquellas peticiones correspondientes a recursos ofrecidos de tipo imagen.
 
 ```{r}
-
+df_5_1 <- logs %>% group_by(method) %>% summarise(comptador = n()) %>% arrange(desc(comptador))
+head(df_5_1)
 ```
 
+```{r}
+tipus <- logs %>% mutate(extensio = str_extract(resource, "(?<=\\.)[^\\.]+$"))
+extensions_imatge <- c("jpg", "jpeg", "png", "gif", "bmp", "svg", "ico")
+imatges <- tipus %>%
+  filter(extensio %in% extensions_imatge)
+
+df_5_2 <- imatges %>%
+  group_by(method) %>%
+  summarise(comptador = n()) %>%
+  arrange(desc(comptador))
+head(df_5_2)
+
+
+```
 ### Visualización de Resultados
 
 #### 6.
@@ -166,6 +181,7 @@ df <- tidyr::separate(
   fill = "right")
 
 df$type[is.na(df$type)] <- "None"
+df$type <- as.factor(df$type)
 
 ```
 
