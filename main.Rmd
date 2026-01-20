@@ -206,6 +206,7 @@ Para processar la columna de **resources**, usaremos el tipo de recurso que se e
 # -   protocol: discard - all are equal but 1 outlier
 # -   status: one hot encoding
 # -   size: use (log scale ? + normalize 0 1) + discard NA
+max_length_type <- 10
 
 df <- tidyr::separate(
   logs, 
@@ -217,6 +218,7 @@ df <- tidyr::separate(
   fill = "right")
 
 df$type[is.na(df$type)] <- "None"
+df <- df %>% mutate(type = if_else(nchar(type) > max_length_type, "None", type))
 df$type <- as.factor(df$type)
 
 ```
@@ -257,6 +259,7 @@ Ahora processamos **method** y **status**. Para transformarlos a datos numérico
 ```{r}
 
 
+
 df <- data.table(df)
 
 df <- one_hot(df, cols = "method")
@@ -271,9 +274,17 @@ df <- one_hot(df, cols = "type")
 # one_hot_type <- model.matrix(~ type - 1, df)
 # one_hot_type <- as.data.frame(one_hot_type) 
 
+df <- df %>% select (-one_of('host', 'timestamp', 'resource', 'resource_1'))
+df <- df %>% drop_na()
+
+```
 
 
 
+
+```{r}
+k <- 3
+results <- kmeans(df, centers = k, nstart = 25)
 ```
 
 #### 9.
