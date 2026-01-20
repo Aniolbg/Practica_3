@@ -274,17 +274,22 @@ df <- one_hot(df, cols = "type")
 # one_hot_type <- model.matrix(~ type - 1, df)
 # one_hot_type <- as.data.frame(one_hot_type) 
 
-df <- df %>% select (-one_of('host', 'timestamp', 'resource', 'resource_1'))
+df <- df %>% select (-one_of('host', 'timestamp', 'resource', 'resource_1', 'protocol'))
 df <- df %>% drop_na()
 
 ```
 
 
-
-
 ```{r}
 k <- 3
 results <- kmeans(df, centers = k, nstart = 25)
+
+```
+
+
+```{r}
+results[2]
+
 ```
 
 #### 9.
@@ -292,6 +297,12 @@ results <- kmeans(df, centers = k, nstart = 25)
 > Representad visualmente en gráficos de tipo scatter plot el resultado de vuestros clústering y interpretad el resultado obtenido.
 >
 > (describid las características de los distintos grupos) con los 2 valores distintos de k probados en el apartado anterior en función de los valores de las variables y el número de clúster asignado.
+
+Queremos visualizar: 
+
+ - Size vs status code
+ - Type (images) vs Size
+ - Method vs size
 
 ```{r}
 
