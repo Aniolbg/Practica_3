@@ -100,6 +100,7 @@ head(logs)
 >
 > Describir en el documento los distintos tipos de errores existentes en la muestra de datos y el número único de usuarios.
 
+Para hacer el ejercicio hemos combinado las funciones group_by y summarise para obtener un dataframe que muestra los distintos status y el número de peticiones con cada status.
 ```{r}
 
 df_4 <- logs %>% group_by(status) %>% summarise(comptador = n()) %>% arrange(desc(comptador))
@@ -122,10 +123,14 @@ El significado de los status son los siguientes:
 
 > Analizar los distintos tipos de peticiones HTTP (GET, POST, PUT, DELETE) gestionadas por el servidor, identificando la frecuencia de cada una de estas. Repetir el análisis, esta vez filtrando previamente aquellas peticiones correspondientes a recursos ofrecidos de tipo imagen.
 
+Para hacer este ejercicio hemos usado la combinación de group_by por metodo y de summarise para poder obtener los distintos métodos y cuantas peticiones han usado cada método.
+
 ```{r}
 df_5_1 <- logs %>% group_by(method) %>% summarise(comptador = n()) %>% arrange(desc(comptador))
 head(df_5_1)
 ```
+
+Para esta version hemos creado un data frame que tiene como variable el tipo de fichero del recurso. A este data frame hemos dejado solo las entradas las cuáles el recurso era una imagen y hemos repetido el mismo proceso del apartado anterior.
 
 ```{r}
 imatges <- logs %>% mutate(extensio = str_extract(resource, "(?<=\\.)[^\\.]+$"))
@@ -160,6 +165,9 @@ head(df_5_2)
 >
 > Pista: Es imprescindible haber codificado correctamente el tipo de cada columna, y en particular, el de la columna usada para representar el momento en que se sirve la respuesta. Con un formato adecuado, será más fácil potencialmente extraer nuevas columnas derivadas de la original que puedan ayudar en la representación de la información (día, hora, etc.)
 
+Para generar el gráfico hemos usado la variable timestamp de nuestro dataset.
+Hemos creado un dataframe que guarda por hora el número de peticiones recibidas.
+Una vez creado, hemos usado ggplot para generar un gráfico que muestra de forma visual la cantidad de peticiones por cada hora.
 ```{r}
 logs_time <- logs %>%
   mutate(hora = floor_date(timestamp, unit = "hour")) %>%
@@ -187,17 +195,9 @@ ggplot(logs_time, aes(x = hora, y = peticiones)) +
 > -   Para este análisis debéis repetir la ejecución del modelado con distintos valores de k (número de clústeres) con al menos 2 valores diferentes de k.
 > -   A fin de retener algo de información sobre el recurso servido, generad una columna numérica derivada de esta con el número de caracteres de la URL servida.
 
-<<<<<<< HEAD
--   host: discard - no useful data
--   timestamp: normalización 0-1 (t - min / (max - min))
--   method: one hot encoding
--   resource: discard
--   protocol: discard - all are equal but 1 outlier
--   status: one hot encoding
--   size: use (log scale ? + normalize 0 1) + discard NA
-=======
+HEAD - host: discard - no useful data - timestamp: normalización 0-1 (t - min / (max - min)) - method: one hot encoding - resource: discard - protocol: discard - all are equal but 1 outlier - status: one hot encoding - size: use (log scale ? + normalize 0 1) + discard NA
+
 Para processar la columna de **resources**, usaremos el tipo de recurso que se está intentando obtener. Por ejemplo para `/icons/circle_logo_small.gif` -\> `gif`. Si no hay ningún tipo, entonces usaremos `None` como un factor para indicar eso. Existen casos dónde el tipo que obtenemos no tiene sentido, pero és un problema que hemos decidido aceptar.
->>>>>>> 101a30b3f3343346b880bdad4cc9752c88602cc0
 
 ```{r warning=FALSE}
 
@@ -228,12 +228,11 @@ Para el siguiente paso, procesaremos **size**. Para empezar, existen algunos val
 -   Descartar las entradas que contengan `NA`.
 -   Dar un valor por defecto a los `NA`, cómo 0 o el valor medio del dataset.
 
-Hemos decidido descartar las filas con `NA`. 
+Hemos decidido descartar las filas con `NA`.
 
-Ahora que tenemos un tipo púramente numérico, podemos trabajar con él. Si miramos algunos de los datos podemos ver que los datos abarcan múltiples órdenes de magnitud, por lo que tiene sentido processsarlos en una escala logarítmica, particularmente sabiendo que solamente hay datos no-negativos. 
+Ahora que tenemos un tipo púramente numérico, podemos trabajar con él. Si miramos algunos de los datos podemos ver que los datos abarcan múltiples órdenes de magnitud, por lo que tiene sentido processsarlos en una escala logarítmica, particularmente sabiendo que solamente hay datos no-negativos.
 
-Optional: Además, aplicaremos la normalización min-max. 
-
+Optional: Además, aplicaremos la normalización min-max.
 
 ```{r}
 
@@ -255,7 +254,7 @@ if (FALSE) {
 
 ```
 
-Ahora processamos **method** y **status**. Para transformarlos a datos numéricos usaremos one hot encoding. 
+Ahora processamos **method** y **status**. Para transformarlos a datos numéricos usaremos one hot encoding.
 
 ```{r}
 
@@ -271,7 +270,6 @@ one_hot_status <- as.data.frame(one_hot_status)
 
 
 ```
-
 
 #### 9.
 
