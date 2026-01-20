@@ -10,12 +10,16 @@ knitr::opts_chunk$set(echo = TRUE)
 # install.packages("tidyr")
 # install.packages("mltools")
 # install.packages("data.table")
+# install.packages("lubridate")
+# install.packages("ggplot2")
 
 library(dplyr)
 library(tidyr)
 library(stringr)
 library(mltools)
 library(data.table)
+library(lubridate)
+library(ggplot2)
 ```
 
 ## 2. Análisis de logs de servidor usando R (parte II)
@@ -103,6 +107,15 @@ head(df_4)
 
 ```
 
+El significado de los status son los siguientes:
+
+-   200: Petición correcta.
+-   304: No modificado.
+-   302: Redirección temporal.
+-   404: No encontrado.
+-   403: Prohibido.
+-   501: No implementado
+
 ### Análisis de Datos
 
 #### 5.
@@ -115,9 +128,9 @@ head(df_5_1)
 ```
 
 ```{r}
-tipus <- logs %>% mutate(extensio = str_extract(resource, "(?<=\\.)[^\\.]+$"))
+imatges <- logs %>% mutate(extensio = str_extract(resource, "(?<=\\.)[^\\.]+$"))
 extensions_imatge <- c("jpg", "jpeg", "png", "gif", "bmp", "svg", "ico")
-imatges <- tipus %>%
+imatges <- imatges %>%
   filter(extensio %in% extensions_imatge)
 
 df_5_2 <- imatges %>%
@@ -128,6 +141,7 @@ head(df_5_2)
 
 
 ```
+
 ### Visualización de Resultados
 
 #### 6.
@@ -147,6 +161,20 @@ head(df_5_2)
 > Pista: Es imprescindible haber codificado correctamente el tipo de cada columna, y en particular, el de la columna usada para representar el momento en que se sirve la respuesta. Con un formato adecuado, será más fácil potencialmente extraer nuevas columnas derivadas de la original que puedan ayudar en la representación de la información (día, hora, etc.)
 
 ```{r}
+logs_time <- logs %>%
+  mutate(hora = floor_date(timestamp, unit = "hour")) %>%
+  group_by(hora) %>%
+  summarise(peticiones = n())
+
+ggplot(logs_time, aes(x = hora, y = peticiones)) +
+  geom_line(color = "steelblue", linewidth = 1) +
+  labs(
+    title = "Número de peticiones a lo largo del tiempo",
+    x = "Tiempo",
+    y = "Número de peticiones"
+  ) +
+  theme_minimal()
+
 
 ```
 
@@ -159,13 +187,13 @@ head(df_5_2)
 > -   Para este análisis debéis repetir la ejecución del modelado con distintos valores de k (número de clústeres) con al menos 2 valores diferentes de k.
 > -   A fin de retener algo de información sobre el recurso servido, generad una columna numérica derivada de esta con el número de caracteres de la URL servida.
 
- - host: discard - no useful data
- - timestamp: normalización 0-1 (t - min / (max - min))
- - method: one hot encoding
- - resource: discard
- - protocol: discard - all are equal but 1 outlier
- - status: one hot encoding
- - size: use (log scale ? + normalize 0 1) + discard NA
+-   host: discard - no useful data
+-   timestamp: normalización 0-1 (t - min / (max - min))
+-   method: one hot encoding
+-   resource: discard
+-   protocol: discard - all are equal but 1 outlier
+-   status: one hot encoding
+-   size: use (log scale ? + normalize 0 1) + discard NA
 
 ```{r warning=FALSE}
 
