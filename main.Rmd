@@ -144,15 +144,17 @@ df_4 <- logs %>% group_by(status) %>% count(status)
 > -   Para este análisis debéis repetir la ejecución del modelado con distintos valores de k (número de clústeres) con al menos 2 valores diferentes de k.
 > -   A fin de retener algo de información sobre el recurso servido, generad una columna numérica derivada de esta con el número de caracteres de la URL servida.
 
- - host: discard - no useful data
- - timestamp: normalización 0-1 (t - min / (max - min))
- - method: one hot encoding
- - resource: discard
- - protocol: discard - all are equal but 1 outlier
- - status: one hot encoding
- - size: use (log scale ? + normalize 0 1) + discard NA
+Para processar la columna de **resources**, usaremos el tipo de recurso que se está intentando obtener. Por ejemplo para `/icons/circle_logo_small.gif` -\> `gif`. Si no hay ningún tipo, entonces usaremos `None` como un factor para indicar eso. Existen casos dónde el tipo que obtenemos no tiene sentido, pero és un problema que hemos decidido aceptar.
 
 ```{r warning=FALSE}
+
+# -   host: discard - no useful data
+# -   timestamp: normalización 0-1 (t - min / (max - min))
+# -   method: one hot encoding
+# -   resource: discard
+# -   protocol: discard - all are equal but 1 outlier
+# -   status: one hot encoding
+# -   size: use (log scale ? + normalize 0 1) + discard NA
 
 df <- tidyr::separate(
   logs, 
@@ -165,10 +167,57 @@ df <- tidyr::separate(
 
 df$type[is.na(df$type)] <- "None"
 
-print(logs$resource[258])
+```
+
+Para el siguiente paso, procesaremos **size**. Para empezar, existen algunos valores que són `NA`, por lo que tenemos que gestionarlos. Para eso hay 2 opciones:
+
+-   Descartar las entradas que contengan `NA`.
+-   Dar un valor por defecto a los `NA`, cómo 0 o el valor medio del dataset.
+
+Hemos decidido descartar las filas con `NA`. 
+
+Ahora que tenemos un tipo púramente numérico, podemos trabajar con él. Si miramos algunos de los datos podemos ver que los datos abarcan múltiples órdenes de magnitud, por lo que tiene sentido processsarlos en una escala logarítmica, particularmente sabiendo que solamente hay datos no-negativos. 
+
+Optional: Además, aplicaremos la normalización min-max. 
+
+
+```{r}
+
+df <- df %>% drop_na()
+
+df$size <- log1p(df$size)
+
+if (FALSE) {
+  
+  size_min <- min(df$size) # 0.0
+  size_max <- max(df$size)
+  
+  df$size <- (df$size - size_min) / (size_max - size_min)
+}
+
+# Opcional: multiplicar por constatne para ajustar tamaños
+# df$size <- df$size * 2.5
 
 
 ```
+
+Ahora processamos **method** y **status**. Para transformarlos a datos numéricos usaremos one hot encoding. 
+
+```{r}
+
+
+# one_hot(df, cols = "method")
+one_hot_method <- model.matrix(~ method - 1, df)
+one_hot_method <- as.data.frame(one_hot_method) 
+
+# one_hot(df, cols = "status")
+one_hot_status <- model.matrix(~ status - 1, df)
+one_hot_status <- as.data.frame(one_hot_status) 
+
+
+
+```
+
 
 #### 9.
 
