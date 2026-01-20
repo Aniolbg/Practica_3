@@ -135,7 +135,7 @@ Para esta version hemos creado un data frame que tiene como variable el tipo de 
 
 ```{r}
 imatges <- logs %>% mutate(extensio = str_extract(resource, "(?<=\\.)[^\\.]+$"))
-extensions_imatge <- c("jpg", "jpeg", "png", "gif", "bmp", "svg", "ico", "GIF")
+extensions_imatge <- c("jpg", "jpeg", "png", "gif", "bmp", "svg", "ico", "GIF", "JPG")
 imatges <- imatges %>%
   filter(extensio %in% extensions_imatge)
 
@@ -157,8 +157,34 @@ head(df_5_2)
 > Estos deberán representar por lo menos 1 o 2 variables diferentes del data frame. Describid el gráfico e indicad cualquier observación destacable que se pueda apreciar gracias a la representación gráfica.
 
 ```{r}
+df_summary <- logs %>% count(method, status)
+ggplot(df_summary, aes(x = method, y = n, fill = status)) +
+  geom_col(position = "dodge") +
+  scale_y_log10() +
+  labs(
+    title = "Número de status por método",
+    x = "Método",
+    y = "Cantidad",
+    fill = "Status"
+  ) +
+  theme_minimal()
 
 ```
+
+Este gráfico muestra el status de las peticiones dependiendo del método. Cada status está representado por un color distinto y la altura de la barra especifica el número de peticiones. En este gráfico en específico resulta interesante el método HEAD, ya que todas las peticiones con este metodo han resultado siempre con un valor 200. También podemos destacar como GET al ser el metodo más usado es el que tiene más valores de status distintos.
+
+```{r}
+df_t <- logs
+df_t$size <- df_t$size + 1
+df_t <- df_t %>% drop_na()
+ggplot(df_t, aes(x = size)) +
+  geom_histogram(aes(y = after_stat(count + 1)), bins = 30) +
+  scale_y_log10() +
+  theme_minimal()
+
+
+```
+Este histograma muestra la frecuencia del tamaño de las peticiones. Como había algunas peticiones con size indeterminado estos no han sido considerados para la creación del histograma. De aquí se puden ver dos cosas intereantes, la primera es la alta frecuencia de metodos con tamaño "pequeño" en comparación con todo el resto. La segunda es como hay pocas peticiones que tienen un tamaño exageradamente grande en comparación con el resto de peticiones, miden casi el doble.
 
 #### 7.
 
@@ -280,6 +306,11 @@ df <- df %>% drop_na()
 ```
 
 ```{r}
+SEED <- 3
+
+set.seed(SEED)
+
+
 k <- 3
 results <- kmeans(df, centers = k, nstart = 25)
 
@@ -298,8 +329,9 @@ results[2]
 
 Queremos visualizar:
 
--   Size vs status code
+
 -   Type (images) vs Size
+-   Size vs status code
 -   Method vs size
 
 ```{r}
