@@ -49,7 +49,16 @@ logs <- read.table("epa-http.csv",
 
 > Incluid en el documento un apartado con la descripción de los datos analizados: fuente, tipología, descripción de la información contenida (los diferentes campos) y sus valores.
 
-TODO: explicación
+Los datos analizados son entradas de logs que muestra la información de peticiones hechas en lo que puede ser una página o aplicación web.
+
+Hay 7 campos claramente diferenciados:
+* Host: Muestra quin ha hecho la petición, sería una variable cualitativa y sus valores van de direcciones IP a direcciones web.
+* Timestamp: Muestra cuando se hizo la petición, en específico muestra el dia, hora, minutos y segundos.
+* Method: Muestra cual ha sido el método de la petición. Es una variable cualitativa y los valores que tiene son GET, POST y HEAD.
+* Resource: Muestra cuál es el recurso usado en la petición. Sería una variable cualitativa y sus valores muestras distintos tipos de ficheros.
+* Protocol: Muestra el protcolo de la petición. Sería una variable cualitativa y en este caso solo prende dos valores HTTP/1.0 y HTTP/0.2
+* Status: Muestra el código del resultado de la petición. Es una variable cualitativa y sus valores son distintos códigos de status como 200, 404, etc.
+* Size: Muestra el tamaño de la petición. Es una variable cuantitativa y sus valores van de 0 ha números bastante grandes.
 
 ### Limpieza de los Datos
 
