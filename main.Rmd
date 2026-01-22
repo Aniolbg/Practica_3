@@ -63,6 +63,14 @@ Hay 7 campos claramente diferenciados: \* Host: Muestra quin ha hecho la petici�
 >
 > Esto incluye la correcta codificación de cada columna de los datos en el tipo adecuado según su naturaleza (numérico, cadena de caracteres, lógico, timestamp, factor, etc.). Además, para esta entrega se valorará también que los datos estén limpios y sin elementos extraños como por ejemplo espacios o signos de puntuación no necesarios.
 
+Para limpiar los datos primero hemos nombrado las 5 columnas que se han generado al extraer los datos del documento.
+
+Usando la función "separate" hemos separado el método, el recurso y el protocolo que se habían extraído juntos en una sola variable.
+
+Para limpiar el "timestamp" primero ha sido necesario eliminar los "[]" con los cuáles venían los datos. Una vez eliminado los corchetes hemos transformado la variable al tipo POSIXct para poder guardarla de la forma más eficiente y manejable posible.
+
+Finalmente, los últimos cambios que hemos hecho para limpiar los datos han sido transformar la variable status a un integer para despues transformarla a un factor. Este último paso también lo hemos hecho con las variables de método y protocolo.
+
 ```{r, cache=TRUE}
 
 colnames(logs) <- c("host", "timestamp", "resource", "status", "size")
@@ -417,11 +425,12 @@ joined_5 <- grid.arrange(grobs = total_graphs[[3]], ncol=3, nrow = 2) # error he
 print(joined_5)
 
 ```
+
 *(Nota: no sabemos porqué se imprimen también algunos dataframes)*
 
 Desafortunadamente, no podemos ver mucha diferéncia entre los grupos. Dónde podemos apreciar una diferencia és en el hecho de que cuándo se envia una imagen, el `size` és menor.
 
-Podemos repetir un analisis similar, pero analizar `size` contra `status_code`. 
+Podemos repetir un analisis similar, pero analizar `size` contra `status_code`.
 
 ```{r}
 
@@ -470,7 +479,6 @@ for (j in 1:len_clusters) {
 
 ```
 
-
 ```{r}
 # k = 2
 joined_2 <- grid.arrange(grobs = total_graphs[[1]], ncol=2)
@@ -488,9 +496,9 @@ print(joined_5)
 
 TODO: conclusiones
 
-Replicamos el proceso nuevamente para **method**. 
+Replicamos el proceso nuevamente para **method**.
 
-```{r} 
+```{r}
 
 df_current <- df %>% select(one_of("method", "size"))
 
@@ -531,8 +539,6 @@ for (j in 1:len_clusters) {
 
 ```
 
-
-
 ```{r}
 # k = 2
 joined_2 <- grid.arrange(grobs = total_graphs[[1]], ncol=2)
@@ -548,22 +554,7 @@ print(joined_5)
 
 ```
 
-
 TODO: conclusiones
 
 ```{r}
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
