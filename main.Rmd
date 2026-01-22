@@ -277,20 +277,20 @@ Optional: Además, aplicaremos la normalización min-max.
 
 ```{r}
 
-df <- df %>% drop_na()
+df_km <- df %>% drop_na()
 
-df$size <- log1p(df$size)
+df_km$size <- log1p(df_km$size)
 
 if (FALSE) {
   
-  size_min <- min(df$size) # 0.0
-  size_max <- max(df$size)
+  size_min <- min(df_km$size) # 0.0
+  size_max <- max(df_km$size)
   
-  df$size <- (df$size - size_min) / (size_max - size_min)
+  df_km$size <- (df_km$size - size_min) / (size_max - size_min)
 }
 
 # Opcional: multiplicar por constatne para ajustar tamaños
-# df$size <- df$size * 2.5
+# df_km$size <- df_km$size * 2.5
 
 
 ```
@@ -301,18 +301,19 @@ Ahora processamos **method** y **status**. Para transformarlos a datos numérico
 
 
 
-df <- data.table(df)
+df_km <- data.table(df_km)
 
-df <- one_hot(df, cols = "method")
+df_km <- one_hot(df_km, cols = "method")
 
-df <- one_hot(df, cols = "status")
+df_km <- one_hot(df_km, cols = "status")
 
-df <- one_hot(df, cols = "type")
+df_km <- one_hot(df_km, cols = "type")
 
 
-df <- df %>% select(-one_of('host', 'timestamp', 'resource', 'resource_1', 'protocol'))
+df_km <- df_km %>% select(-one_of('host', 'timestamp', 'resource', 'resource_1', 'protocol'))
 
 # Por si acaso
+df_km <- df_km %>% drop_na()
 df <- df %>% drop_na()
 
 ```
@@ -334,14 +335,8 @@ Ejecutamos el algoritmo K-means.
 
 ```{r, cache=TRUE}
 
-results <- lapply(clusters, function(k) kmeans(df, centers = k, nstart = 25))
+results <- lapply(clusters, function(k) kmeans(df_km, centers = k, nstart = 25))
 
-```
-
-```{r, cache=TRUE}
-
-# results_2 <- kmeans(df, centers = 2)
-# typeof(results[[1]]$cluster)
 ```
 
 #### 9.
@@ -363,12 +358,13 @@ Primeramente creamos una variable para diferenciar entre las imagenes y el resto
 
 # Los formatos no usados no estan porque aparecen 0 veces. 
 # extensions_imatge <- c("jpg", "jpeg", "png", "gif", "bmp", "svg", "ico", "GIF")
-is_image_idx <- df$type_.jpg == 1 |
-  df$type_.JPG == 1 |
-  df$type_.gif == 1 |
-  df$type_.GIF == 1 |
-  df$type_.ico == 1
+is_image_idx <- df_km$type_.jpg == 1 |
+  df_km$type_.JPG == 1 |
+  df_km$type_.gif == 1 |
+  df_km$type_.GIF == 1 |
+  df_km$type_.ico == 1
 
+df_km$is_image <- is_image_idx
 df$is_image <- is_image_idx
 
 palette = c("#E0614A", "#5D3CE0", "#E0D04A", "#4AE0A2", "#8B865C", "#615350")
@@ -376,7 +372,7 @@ palette = c("#E0614A", "#5D3CE0", "#E0D04A", "#4AE0A2", "#8B865C", "#615350")
 ```
 
 ```{r}
-df_current <- df %>% select(one_of("size", "is_image"))
+df_current <- df_km %>% select(one_of("size", "is_image"))
 
 total_graphs <- list()
 
@@ -421,6 +417,7 @@ joined_5 <- grid.arrange(grobs = total_graphs[[3]], ncol=3, nrow = 2) # error he
 print(joined_5)
 
 ```
+*(Nota: no sabemos porqué se imprimen también algunos dataframes)*
 
 Desafortunadamente, no podemos ver mucha diferéncia entre los grupos. Dónde podemos apreciar una diferencia és en el hecho de que cuándo se envia una imagen, el `size` és menor.
 
@@ -430,12 +427,64 @@ Podemos repetir un analisis similar, pero analizar `size` contra `status_code`.
 
 palette_2 <- c("#F09224", "#7329F0", "#17F042", "#F0362B", "#2991F0", "#E0F018", "#704643", "#435B70")
 
+status_codes = c("status_200", "status_302", "status_304", "status_400", "status_403", "status_404", "status_500", "status_501")
+
+df_current <- df %>% select(one_of("status", "size"))
+
+
+total_graphs <- list()
+
+for (j in 1:len_clusters) {
+  k <- clusters[j]  
+  current_result <- results[[j]]
+  df_current$group <- current_result$cluster
+  
+  graphs <- list()
+  
+  
+  for (i in 1:k) {
+    label <- sprintf("Category in group %d\nFor %d clusters", i, k)
+    
+    current = df_current[df_current$group == i, ]
+    
+    summary_df <- current %>% 
+      group_by(status) %>% 
+      summarise(total_value = sum(size), .groups = "drop") %>% 
+      complete(status, fill = list(total_value = 0))
+    
+    graph <- ggplot(summary_df, aes(x = status, y = total_value + 1)) + 
+      scale_y_log10() + 
+      stat_summary(fun = "sum", geom = "bar") + 
+      labs(x = label, y = "size") + 
+      theme_minimal() 
+    
+    # graph <- ggplot(df_current[df_current[group == i]], aes(y = size)) + 
+    #   geom_bar() + 
+    graphs[[i]] = graph
+  }
+  total_graphs[[j]] = graphs
+}
+
+
 ```
 
 
+```{r}
+# k = 2
+joined_2 <- grid.arrange(grobs = total_graphs[[1]], ncol=2)
+print(joined_2)
 
+# k = 3
+joined_3 <- grid.arrange(grobs = total_graphs[[2]], ncol=3)
+print(joined_3)
 
+# k = 5
+joined_5 <- grid.arrange(grobs = total_graphs[[3]], ncol=3, nrow = 2)
+print(joined_5)
 
+```
+
+TODO: conclusiones
 
 
 
