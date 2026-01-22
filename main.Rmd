@@ -267,16 +267,17 @@ df$type <- as.factor(df$type)
 Para el siguiente paso, procesaremos **size**. Para empezar, existen algunos valores que són `NA`, por lo que tenemos que gestionarlos. Para eso hay 2 opciones:
 
 -   Descartar las entradas que contengan `NA`.
--   Dar un valor por defecto a los `NA`, cómo 0 o el valor medio del dataset.
+-   Dar un valor a los `NA`, cómo 0 o el valor medio del dataset.
 
 Hemos decidido descartar las filas con `NA`.
 
 Ahora que tenemos un tipo púramente numérico, podemos trabajar con él. Si miramos algunos de los datos podemos ver que los datos abarcan múltiples órdenes de magnitud, por lo que tiene sentido processsarlos en una escala logarítmica, particularmente sabiendo que solo hay datos no-negativos.
 
-Optional: Además, aplicaremos la normalización min-max.
+Optional: Además, aplicaremos la normalización min-max. Esto podría servir para que los valores de size no tengan una influencia desmesurada sobre el resto de componentes (que tienen magnitudes más pequeñas). 
 
 ```{r}
 
+# df_km= DataFrame K Means
 df_km <- df %>% drop_na()
 
 df_km$size <- log1p(df_km$size)
@@ -348,8 +349,8 @@ results <- lapply(clusters, function(k) kmeans(df_km, centers = k, nstart = 25))
 Queremos visualizar:
 
 -   Type (images) vs Size
--   Size vs status code
--   Method vs size
+-   Distribution of status code
+-   Distribution of Method
 
 Primeramente creamos una variable para diferenciar entre las imagenes y el resto del contenido.
 
@@ -370,6 +371,8 @@ df$is_image <- is_image_idx
 palette = c("#E0614A", "#5D3CE0", "#E0D04A", "#4AE0A2", "#8B865C", "#615350")
 
 ```
+
+Generamos los gráficos con un boxplot. Un boxplot nos permitirá visualizar la distribución de `size`. 
 
 ```{r}
 df_current <- df_km %>% select(one_of("size", "is_image"))
@@ -429,8 +432,7 @@ palette_2 <- c("#F09224", "#7329F0", "#17F042", "#F0362B", "#2991F0", "#E0F018",
 
 status_codes = c("status_200", "status_302", "status_304", "status_400", "status_403", "status_404", "status_500", "status_501")
 
-df_current <- df %>% select(one_of("status", "size"))
-
+df_current <- df %>% select(one_of("status"))
 
 total_graphs <- list()
 
@@ -447,17 +449,26 @@ for (j in 1:len_clusters) {
     
     current = df_current[df_current$group == i, ]
     
-    summary_df <- current %>% 
-      group_by(status) %>% 
-      summarise(total_value = sum(size), .groups = "drop") %>% 
-      complete(status, fill = list(total_value = 0))
+    # summary_df <- current %>% 
+    #   group_by(status) %>% 
+    #   summarise(total_value = sum(size), .groups = "drop") %>% 
+    #   complete(status, fill = list(total_value = 0))
     
-    graph <- ggplot(summary_df, aes(x = status, y = total_value + 2, fill = palette_2)) + 
+    current$status <- droplevels(current$status)
+    
+    graph <- ggplot(current, aes(x = status, fill = status)) + 
+      geom_bar() + 
       scale_y_log10() + 
-      stat_summary(fun = "sum", geom = "bar") + 
-      labs(x = label, y = "size") + 
-      scale_fill_manual(values = palette_2) + 
-      theme(legend.position = "top")
+      scale_fill_manual(values = palette_2) +
+      labs(x = label, y = "Count", fill = "status") 
+      # theme_minimal()
+      # theme(legend.position = "top")
+    # graph <- ggplot(df_current, aes(x = status, fill = palette_2)) + 
+    #   scale_y_log10() + 
+    #   stat_summary(geom = "bar") + 
+    #   labs(x = label, y = "size") + 
+    #   scale_fill_manual(values = palette_2) + 
+    #   theme(legend.position = "top")
       # theme_minimal() 
     
     # graph <- ggplot(df_current[df_current[group == i]], aes(y = size)) + 
@@ -486,16 +497,16 @@ print(joined_5)
 
 ```
 
-TODO: conclusiones
+Podemos ver que siempre hay un cluster que contiene una mayor variabilidad de status code (grupo 1 para k = 2, grupo 2 para k = 3 y grupo 1 para k = 5). También suele haver un grupo que contiene el resto de códigos 302 y algunos 200. Si hay, el resto de grupos sólo hay cosigos 200. Para el caso de k = 5, eso puede significar que nos sobran grupos o que k means está capturando información que no podemos visualizar desde esta perspectiva. 
 
 Replicamos el proceso nuevamente para **method**. 
 
 ```{r} 
 
-df_current <- df %>% select(one_of("method", "size"))
-
-palette_3 <- c("#F09224", "#7329F0", "#17F042")
+palette_3 <- c("#2991F0", "#F0362B", "#E0F018")
 total_graphs <- list()
+
+df_current <- df %>% select(one_of("method"))
 
 for (j in 1:len_clusters) {
   k <- clusters[j]  
@@ -510,25 +521,18 @@ for (j in 1:len_clusters) {
     
     current = df_current[df_current$group == i, ]
     
-    summary_df <- current %>% 
-      group_by(method) %>% 
-      summarise(total_value = sum(size), .groups = "drop") %>% 
-      complete(method, fill = list(total_value = 0))
+    current$status <- droplevels(current$method)
     
-    graph <- ggplot(summary_df, aes(x = method, y = total_value + 2, fill = palette_3)) + 
-      stat_summary(fun = "sum", geom = "bar") + 
+    graph <- ggplot(current, aes(x = method, fill = method)) + 
+      geom_bar() + 
       scale_y_log10() + 
-      labs(x = label, y = "size") + 
-      # theme_minimal() + 
-      theme(legend.position = "top")
-    
-    # graph <- ggplot(df_current[df_current[group == i]], aes(y = size)) + 
-    #   geom_bar() + 
+      scale_fill_manual(values = palette_3) +
+      labs(x = label, y = "Count", fill = "method") 
+
     graphs[[i]] = graph
   }
   total_graphs[[j]] = graphs
 }
-
 ```
 
 
@@ -548,8 +552,10 @@ print(joined_5)
 
 ```
 
+Podemos ver que k means siempre deja todas las peticiones de tipo POST en un único grupo (k = 2 => grupo 1, k = 3 => grupo 2, k = 5 => grupo 1). El grupo donde dejalas peticiones post coincide con el grupo dónde deja más status codes en la sección anterior, así que podemos crear la conjetura de que las peticiones post devuelven los códigos no presentes en los otros gráficos, lo que concuerda con la información del ejercicio 6. 
 
-TODO: conclusiones
+Sin embargo, no podemos ver muchos más diferencias entre los grupos, ya que todos parecen tener *aproximadamente* la misma proporción de requests GET y HEAD. 
+
 
 ```{r}
 ```
