@@ -443,7 +443,7 @@ for (j in 1:len_clusters) {
   
   
   for (i in 1:k) {
-    label <- sprintf("Category in group %d\nFor %d clusters", i, k)
+    label <- sprintf("Status code in group %d\nFor %d clusters", i, k)
     
     current = df_current[df_current$group == i, ]
     
@@ -486,15 +486,67 @@ print(joined_5)
 
 TODO: conclusiones
 
+Replicamos el proceso nuevamente para **method**. 
+
+```{r} 
+
+df_current <- df %>% select(one_of("method", "size"))
+
+
+total_graphs <- list()
+
+for (j in 1:len_clusters) {
+  k <- clusters[j]  
+  current_result <- results[[j]]
+  df_current$group <- current_result$cluster
+  
+  graphs <- list()
+  
+  
+  for (i in 1:k) {
+    label <- sprintf("Method in group %d\nFor %d clusters", i, k)
+    
+    current = df_current[df_current$group == i, ]
+    
+    summary_df <- current %>% 
+      group_by(method) %>% 
+      summarise(total_value = sum(size), .groups = "drop") %>% 
+      complete(method, fill = list(total_value = 0))
+    
+    graph <- ggplot(summary_df, aes(x = method, y = total_value + 1)) + 
+      scale_y_log10() + 
+      stat_summary(fun = "sum", geom = "bar") + 
+      labs(x = label, y = "size") + 
+      theme_minimal() 
+    
+    # graph <- ggplot(df_current[df_current[group == i]], aes(y = size)) + 
+    #   geom_bar() + 
+    graphs[[i]] = graph
+  }
+  total_graphs[[j]] = graphs
+}
+
+```
 
 
 
+```{r}
+# k = 2
+joined_2 <- grid.arrange(grobs = total_graphs[[1]], ncol=2)
+print(joined_2)
+
+# k = 3
+joined_3 <- grid.arrange(grobs = total_graphs[[2]], ncol=3)
+print(joined_3)
+
+# k = 5
+joined_5 <- grid.arrange(grobs = total_graphs[[3]], ncol=3, nrow = 2)
+print(joined_5)
+
+```
 
 
-
-
-
-
+TODO: conclusiones
 
 
 
