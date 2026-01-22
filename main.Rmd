@@ -12,6 +12,7 @@ knitr::opts_chunk$set(echo = TRUE)
 # install.packages("data.table")
 # install.packages("lubridate")
 # install.packages("ggplot2")
+# install.packages("gridExtra")
 
 library(dplyr)
 library(tidyr)
@@ -20,6 +21,7 @@ library(mltools)
 library(data.table)
 library(lubridate)
 library(ggplot2)
+library(gridExtra)
 ```
 
 ## 2. Análisis de logs de servidor usando R (parte II)
@@ -51,14 +53,7 @@ logs <- read.table("epa-http.csv",
 
 Los datos analizados son entradas de logs que muestra la información de peticiones hechas en lo que puede ser una página o aplicación web.
 
-Hay 7 campos claramente diferenciados:
-* Host: Muestra quin ha hecho la petición, sería una variable cualitativa y sus valores van de direcciones IP a direcciones web.
-* Timestamp: Muestra cuando se hizo la petición, en específico muestra el dia, hora, minutos y segundos.
-* Method: Muestra cual ha sido el método de la petición. Es una variable cualitativa y los valores que tiene son GET, POST y HEAD.
-* Resource: Muestra cuál es el recurso usado en la petición. Sería una variable cualitativa y sus valores muestras distintos tipos de ficheros.
-* Protocol: Muestra el protcolo de la petición. Sería una variable cualitativa y en este caso solo prende dos valores HTTP/1.0 y HTTP/0.2
-* Status: Muestra el código del resultado de la petición. Es una variable cualitativa y sus valores son distintos códigos de status como 200, 404, etc.
-* Size: Muestra el tamaño de la petición. Es una variable cuantitativa y sus valores van de 0 ha números bastante grandes.
+Hay 7 campos claramente diferenciados: \* Host: Muestra quin ha hecho la petición, sería una variable cualitativa y sus valores van de direcciones IP a direcciones web. \* Timestamp: Muestra cuando se hizo la petición, en específico muestra el dia, hora, minutos y segundos. \* Method: Muestra cual ha sido el método de la petición. Es una variable cualitativa y los valores que tiene son GET, POST y HEAD. \* Resource: Muestra cuál es el recurso usado en la petición. Sería una variable cualitativa y sus valores muestras distintos tipos de ficheros. \* Protocol: Muestra el protcolo de la petición. Sería una variable cualitativa y en este caso solo prende dos valores HTTP/1.0 y HTTP/0.2 \* Status: Muestra el código del resultado de la petición. Es una variable cualitativa y sus valores son distintos códigos de status como 200, 404, etc. \* Size: Muestra el tamaño de la petición. Es una variable cuantitativa y sus valores van de 0 ha números bastante grandes.
 
 ### Limpieza de los Datos
 
@@ -91,9 +86,6 @@ logs$size <- as.integer(logs$size)
 )
 
 
-
-
-
 head(logs)
 
 
@@ -109,11 +101,15 @@ head(logs)
 >
 > Describir en el documento los distintos tipos de errores existentes en la muestra de datos y el número único de usuarios.
 
-Para hacer el ejercicio hemos combinado las funciones group_by y summarise para obtener un dataframe que muestra los distintos status y el número de peticiones con cada status.
+Para hacer el ejercicio hemos combinado las funciones `group_by` y `summarise` para obtener un dataframe que muestra los distintos status y el número de peticiones con cada status.
 
 ```{r}
 
-df_4 <- logs %>% group_by(status) %>% summarise(comptador = n()) %>% arrange(desc(comptador))
+df_4 <- logs %>% 
+  group_by(status) %>% 
+  summarise(comptador = n()) %>% 
+  arrange(desc(comptador))
+
 head(df_4)
 
 ```
@@ -136,7 +132,11 @@ El significado de los status son los siguientes:
 Para hacer este ejercicio hemos usado la combinación de group_by por metodo y de summarise para poder obtener los distintos métodos y cuantas peticiones han usado cada método.
 
 ```{r}
-df_5_1 <- logs %>% group_by(method) %>% summarise(comptador = n()) %>% arrange(desc(comptador))
+df_5_1 <- logs %>% 
+  group_by(method) %>% 
+  summarise(comptador = n()) %>% 
+  arrange(desc(comptador))
+
 head(df_5_1)
 ```
 
@@ -144,7 +144,9 @@ Para esta version hemos creado un data frame que tiene como variable el tipo de 
 
 ```{r}
 imatges <- logs %>% mutate(extensio = str_extract(resource, "(?<=\\.)[^\\.]+$"))
+
 extensions_imatge <- c("jpg", "jpeg", "png", "gif", "bmp", "svg", "ico", "GIF", "JPG")
+
 imatges <- imatges %>%
   filter(extensio %in% extensions_imatge)
 
@@ -152,8 +154,8 @@ df_5_2 <- imatges %>%
   group_by(method) %>%
   summarise(comptador = n()) %>%
   arrange(desc(comptador))
-head(df_5_2)
 
+head(df_5_2)
 
 ```
 
@@ -193,6 +195,7 @@ ggplot(df_t, aes(x = size)) +
 
 
 ```
+
 Este histograma muestra la frecuencia del tamaño de las peticiones. Como había algunas peticiones con size indeterminado estos no han sido considerados para la creación del histograma. De aquí se puden ver dos cosas intereantes, la primera es la alta frecuencia de metodos con tamaño "pequeño" en comparación con todo el resto. La segunda es como hay pocas peticiones que tienen un tamaño exageradamente grande en comparación con el resto de peticiones, miden casi el doble.
 
 #### 7.
@@ -230,7 +233,9 @@ ggplot(logs_time, aes(x = hora, y = peticiones)) +
 > -   Para este análisis debéis repetir la ejecución del modelado con distintos valores de k (número de clústeres) con al menos 2 valores diferentes de k.
 > -   A fin de retener algo de información sobre el recurso servido, generad una columna numérica derivada de esta con el número de caracteres de la URL servida.
 
-Para processar la columna de **resources**, usaremos el tipo de recurso que se está intentando obtener. Por ejemplo para `/icons/circle_logo_small.gif` -\> `gif`. Si no hay ningún tipo, entonces usaremos `None` como un factor para indicar eso. Existen casos dónde el tipo que obtenemos no tiene sentido, pero és un problema que hemos decidido aceptar.
+El algoritmo de K-menas necessita usar datos numéricos, así que tenemos que transdormar las columnas **resources**, **size**, **method** y **status** a datos numéricos.
+
+Para processar la columna de **resources**, usaremos el tipo de recurso que se está intentando obtener como un factor. Por ejemplo para `/icons/circle_logo_small.gif` -\> `gif`. Si no hay ningún tipo, entonces usaremos `None` como un factor para indicar eso. Existen casos dónde el tipo que obtenemos no tiene sentido, pero és un problema que hemos decidido aceptar.
 
 ```{r warning=FALSE}
 
@@ -241,6 +246,7 @@ Para processar la columna de **resources**, usaremos el tipo de recurso que se e
 # -   protocol: discard - all are equal but 1 outlier
 # -   status: one hot encoding
 # -   size: use (log scale ? + normalize 0 1) + discard NA
+
 max_length_type <- 10
 
 df <- tidyr::separate(
@@ -265,7 +271,7 @@ Para el siguiente paso, procesaremos **size**. Para empezar, existen algunos val
 
 Hemos decidido descartar las filas con `NA`.
 
-Ahora que tenemos un tipo púramente numérico, podemos trabajar con él. Si miramos algunos de los datos podemos ver que los datos abarcan múltiples órdenes de magnitud, por lo que tiene sentido processsarlos en una escala logarítmica, particularmente sabiendo que solamente hay datos no-negativos.
+Ahora que tenemos un tipo púramente numérico, podemos trabajar con él. Si miramos algunos de los datos podemos ver que los datos abarcan múltiples órdenes de magnitud, por lo que tiene sentido processsarlos en una escala logarítmica, particularmente sabiendo que solo hay datos no-negativos.
 
 Optional: Además, aplicaremos la normalización min-max.
 
@@ -289,7 +295,7 @@ if (FALSE) {
 
 ```
 
-Ahora processamos **method** y **status**. Para transformarlos a datos numéricos usaremos one hot encoding.
+Ahora processamos **method** y **status**. Para transformarlos a datos numéricos usaremos one hot encoding. Hacemos lo mismo para la columna **type** y descartamos as columnas que no necessitamos.
 
 ```{r}
 
@@ -298,36 +304,44 @@ Ahora processamos **method** y **status**. Para transformarlos a datos numérico
 df <- data.table(df)
 
 df <- one_hot(df, cols = "method")
-# one_hot_method <- model.matrix(~ method - 1, df)
-# one_hot_method <- as.data.frame(one_hot_method) 
 
 df <- one_hot(df, cols = "status")
-# one_hot_status <- model.matrix(~ status - 1, df)
-# one_hot_status <- as.data.frame(one_hot_status) 
 
 df <- one_hot(df, cols = "type")
-# one_hot_type <- model.matrix(~ type - 1, df)
-# one_hot_type <- as.data.frame(one_hot_type) 
 
-df <- df %>% select (-one_of('host', 'timestamp', 'resource', 'resource_1', 'protocol'))
+
+df <- df %>% select(-one_of('host', 'timestamp', 'resource', 'resource_1', 'protocol'))
+
+# Por si acaso
 df <- df %>% drop_na()
 
 ```
 
-```{r}
+Preparamos algunas variables para la ejecución del K-means.
+
+```{r, cache=TRUE}
 SEED <- 3
 
 set.seed(SEED)
 
 
-k <- 3
-results <- kmeans(df, centers = k, nstart = 25)
+clusters <- c(2, 3, 5)
+len_clusters = length(clusters)
+max_iter = 250
+```
+
+Ejecutamos el algoritmo K-means.
+
+```{r, cache=TRUE}
+
+results <- lapply(clusters, function(k) kmeans(df, centers = k, nstart = 25))
 
 ```
 
-```{r}
-results[2]
+```{r, cache=TRUE}
 
+# results_2 <- kmeans(df, centers = 2)
+# typeof(results[[1]]$cluster)
 ```
 
 #### 9.
@@ -338,20 +352,16 @@ results[2]
 
 Queremos visualizar:
 
-
 -   Type (images) vs Size
 -   Size vs status code
 -   Method vs size
 
-```{r}
-
-df$group <- results[1]
-
-tmp <- df[df$group == 1]
-```
+Primeramente creamos una variable para diferenciar entre las imagenes y el resto del contenido.
 
 ```{r}
 
+
+# Los formatos no usados no estan porque aparecen 0 veces. 
 # extensions_imatge <- c("jpg", "jpeg", "png", "gif", "bmp", "svg", "ico", "GIF")
 is_image_idx <- df$type_.jpg == 1 |
   df$type_.JPG == 1 |
@@ -361,16 +371,94 @@ is_image_idx <- df$type_.jpg == 1 |
 
 df$is_image <- is_image_idx
 
-par(mfrow = c(1, 3))
-
-palette = c("red", "green", "blue")
-
-for (i in 1:k) {
-  current = df[df$group == i]
-  label = sprintf("From group %d, is an image?", i)
-  boxplot(size ~ is_image, data = df, xlab = label, col = palette[i])
-}
-
-
+palette = c("#E0614A", "#5D3CE0", "#E0D04A", "#4AE0A2", "#8B865C", "#615350")
 
 ```
+
+```{r}
+df_current <- df %>% select(one_of("size", "is_image"))
+
+total_graphs <- list()
+
+for (j in 1:len_clusters) {
+  current_result <- results[[j]]
+  group_labels <- current_result$cluster
+  df_current$group <- group_labels
+
+  k <- clusters[j]  
+  par(mfrow = c(k, 1))
+  graphs <- list()
+  
+  for (i in 1:k) {
+    current = df_current[df_current$group == i]
+    label = sprintf("From group %d, is an image?\n%d clusters", i, k)
+    # boxplot(size ~ is_image, data = df_current, xlab = label, col = palette[i])
+    
+    graph <- ggplot(df_current, aes(x = is_image, y = size, fill = is_image)) + 
+      geom_boxplot() + 
+      labs(x = label, y = "size") + 
+      scale_fill_manual(values = palette)
+    graphs[[i]] = graph
+  }
+  total_graphs[[j]] = graphs
+}
+
+```
+
+Ahora mostramos los graficos.
+
+```{r}
+# k = 2
+joined_2 <- grid.arrange(grobs = total_graphs[[1]], ncol=2) # error here
+print(joined_2)
+
+# k = 3
+joined_3 <- grid.arrange(grobs = total_graphs[[2]], ncol=3) # error here
+print(joined_3)
+
+# k = 5
+joined_5 <- grid.arrange(grobs = total_graphs[[3]], ncol=3, nrow = 2) # error here
+print(joined_5)
+
+```
+
+Desafortunadamente, no podemos ver mucha diferéncia entre los grupos. Dónde podemos apreciar una diferencia és en el hecho de que cuándo se envia una imagen, el `size` és menor.
+
+Podemos repetir un analisis similar, pero analizar `size` contra `status_code`. 
+
+```{r}
+
+palette_2 <- c("#F09224", "#7329F0", "#17F042", "#F0362B", "#2991F0", "#E0F018", "#704643", "#435B70")
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
