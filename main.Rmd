@@ -1,6 +1,6 @@
 ---
 title: "Main"
-author: "Aniol, Omar, Marcel Aranich"
+author: "Aniol Boladeras, Luis Omar Castro, Marcel Aranich"
 date: "2026-01-19"
 output: html_document
 ---
@@ -51,7 +51,7 @@ logs <- read.table("epa-http.csv",
 
 > Incluid en el documento un apartado con la descripción de los datos analizados: fuente, tipología, descripción de la información contenida (los diferentes campos) y sus valores.
 
-Los datos analizados son entradas de logs que muestra la información de peticiones hechas en lo que puede ser una página o aplicación web.
+Los datos analizados son entradas de logs que muestran la información de peticiones hechas en lo que puede ser una página o aplicación web.
 
 Hay 7 campos claramente diferenciados:
 
@@ -204,7 +204,7 @@ ggplot(df_summary, aes(x = method, y = n, fill = status)) +
 
 ```
 
-Este gráfico muestra el status de las peticiones dependiendo del método. Cada status está representado por un color distinto y la altura de la barra especifica el número de peticiones. En este gráfico en específico resulta interesante el método HEAD, ya que todas las peticiones con este método han resultado siempre con un valor 200. También podemos destacar como GET al ser el método más usado es el que tiene más valores de status distintos.
+Este gráfico muestra el status de las peticiones dependiendo del método. Cada status está representado por un color distinto y la altura de la barra especifica, el número de peticiones. En este gráfico en específico resulta interesante el método HEAD, ya que todas las peticiones con este método han resultado siempre con un valor 200. También podemos destacar como GET al ser el método más usado es el que tiene más valores de status distintos.
 
 ```{r}
 df_t <- logs
@@ -293,7 +293,7 @@ Para el siguiente paso, procesaremos **size**. Para empezar, existen algunos val
 
 Hemos decidido descartar las filas con `NA`.
 
-Ahora que tenemos un tipo púramente numérico, podemos trabajar con él. Si miramos algunos de los datos podemos ver que los datos abarcan múltiples órdenes de magnitud, por lo que tiene sentido processsarlos en una escala logarítmica, particularmente sabiendo que solo hay datos no-negativos.
+Ahora que tenemos un tipo púramente numérico, podemos trabajar con él. Si miramos algunos de los datos podemos ver que los datos abarcan múltiples órdenes de magnitud, por lo que tiene sentido procesarlos en una escala logarítmica, particularmente sabiendo que solo hay datos no-negativos.
 
 Optional: Además, aplicaremos la normalización min-max. Esto podría servir para que los valores de size no tengan una influencia desmesurada sobre el resto de componentes (que tienen magnitudes más pequeñas).
 
@@ -394,7 +394,7 @@ palette = c("#E0614A", "#5D3CE0", "#E0D04A", "#4AE0A2", "#8B865C", "#615350")
 
 ```
 
-Generamos los gráficos con un boxplot. Un boxplot nos permitirá visualizar la distribución de `size`.
+Generamos los gráficos con un boxplot, que nos permitirá visualizar la distribución de `size`.
 
 ```{r}
 df_current <- df_km %>% select(one_of("size", "is_image"))
