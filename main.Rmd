@@ -452,11 +452,13 @@ for (j in 1:len_clusters) {
       summarise(total_value = sum(size), .groups = "drop") %>% 
       complete(status, fill = list(total_value = 0))
     
-    graph <- ggplot(summary_df, aes(x = status, y = total_value + 1)) + 
+    graph <- ggplot(summary_df, aes(x = status, y = total_value + 2, fill = palette_2)) + 
       scale_y_log10() + 
       stat_summary(fun = "sum", geom = "bar") + 
       labs(x = label, y = "size") + 
-      theme_minimal() 
+      scale_fill_manual(values = palette_2) + 
+      theme(legend.position = "top")
+      # theme_minimal() 
     
     # graph <- ggplot(df_current[df_current[group == i]], aes(y = size)) + 
     #   geom_bar() + 
@@ -492,7 +494,7 @@ Replicamos el proceso nuevamente para **method**.
 
 df_current <- df %>% select(one_of("method", "size"))
 
-
+palette_3 <- c("#F09224", "#7329F0", "#17F042")
 total_graphs <- list()
 
 for (j in 1:len_clusters) {
@@ -513,11 +515,12 @@ for (j in 1:len_clusters) {
       summarise(total_value = sum(size), .groups = "drop") %>% 
       complete(method, fill = list(total_value = 0))
     
-    graph <- ggplot(summary_df, aes(x = method, y = total_value + 1)) + 
-      scale_y_log10() + 
+    graph <- ggplot(summary_df, aes(x = method, y = total_value + 2, fill = palette_3)) + 
       stat_summary(fun = "sum", geom = "bar") + 
+      scale_y_log10() + 
       labs(x = label, y = "size") + 
-      theme_minimal() 
+      # theme_minimal() + 
+      theme(legend.position = "top")
     
     # graph <- ggplot(df_current[df_current[group == i]], aes(y = size)) + 
     #   geom_bar() + 
@@ -548,7 +551,8 @@ print(joined_5)
 
 TODO: conclusiones
 
-
+```{r}
+```
 
 
 
