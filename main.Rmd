@@ -53,7 +53,21 @@ logs <- read.table("epa-http.csv",
 
 Los datos analizados son entradas de logs que muestra la información de peticiones hechas en lo que puede ser una página o aplicación web.
 
-Hay 7 campos claramente diferenciados: \* Host: Muestra quin ha hecho la petición, sería una variable cualitativa y sus valores van de direcciones IP a direcciones web. \* Timestamp: Muestra cuando se hizo la petición, en específico muestra el dia, hora, minutos y segundos. \* Method: Muestra cual ha sido el método de la petición. Es una variable cualitativa y los valores que tiene son GET, POST y HEAD. \* Resource: Muestra cuál es el recurso usado en la petición. Sería una variable cualitativa y sus valores muestras distintos tipos de ficheros. \* Protocol: Muestra el protcolo de la petición. Sería una variable cualitativa y en este caso solo prende dos valores HTTP/1.0 y HTTP/0.2 \* Status: Muestra el código del resultado de la petición. Es una variable cualitativa y sus valores son distintos códigos de status como 200, 404, etc. \* Size: Muestra el tamaño de la petición. Es una variable cuantitativa y sus valores van de 0 ha números bastante grandes.
+Hay 7 campos claramente diferenciados:
+
+-   **Host:** Muestra quién ha hecho la petición. Es una variable cualitativa y sus valores van desde direcciones IP hasta direcciones web.
+
+-   **Timestamp:** Muestra cuándo se hizo la petición; específicamente indica día, hora, minutos y segundos.
+
+-   **Method:** Muestra cuál ha sido el método de la petición. Es una variable cualitativa y puede tomar los valores GET, POST y HEAD.
+
+-   **Resource:** Muestra cuál es el recurso usado en la petición. Es una variable cualitativa y sus valores corresponden a distintos tipos de ficheros.
+
+-   **Protocol:** Muestra el protocolo de la petición. Es una variable cualitativa y puede tomar los valores HTTP/1.0 y HTTP/0.2.
+
+-   **Status:** Muestra el código del resultado de la petición. Es una variable cualitativa y puede tomar valores como 200, 404, etc.
+
+-   **Size:** Muestra el tamaño de la petición. Es una variable cuantitativa y sus valores van desde 0 hasta números bastante grandes.
 
 ### Limpieza de los Datos
 
@@ -148,7 +162,7 @@ df_5_1 <- logs %>%
 head(df_5_1)
 ```
 
-Para esta version hemos creado un data frame que tiene como variable el tipo de fichero del recurso. A este data frame hemos dejado solo las entradas las cuáles el recurso era una imagen y hemos repetido el mismo proceso del apartado anterior.
+Para esta versión hemos creado un data frame que tiene como variable el tipo de fichero del recurso. A este data frame hemos dejado solo las entradas las cuáles el recurso era una imagen y hemos repetido el mismo proceso del apartado anterior.
 
 ```{r}
 imatges <- logs %>% mutate(extensio = str_extract(resource, "(?<=\\.)[^\\.]+$"))
@@ -190,7 +204,7 @@ ggplot(df_summary, aes(x = method, y = n, fill = status)) +
 
 ```
 
-Este gráfico muestra el status de las peticiones dependiendo del método. Cada status está representado por un color distinto y la altura de la barra especifica el número de peticiones. En este gráfico en específico resulta interesante el método HEAD, ya que todas las peticiones con este metodo han resultado siempre con un valor 200. También podemos destacar como GET al ser el metodo más usado es el que tiene más valores de status distintos.
+Este gráfico muestra el status de las peticiones dependiendo del método. Cada status está representado por un color distinto y la altura de la barra especifica el número de peticiones. En este gráfico en específico resulta interesante el método HEAD, ya que todas las peticiones con este método han resultado siempre con un valor 200. También podemos destacar como GET al ser el método más usado es el que tiene más valores de status distintos.
 
 ```{r}
 df_t <- logs
@@ -204,7 +218,7 @@ ggplot(df_t, aes(x = size)) +
 
 ```
 
-Este histograma muestra la frecuencia del tamaño de las peticiones. Como había algunas peticiones con size indeterminado estos no han sido considerados para la creación del histograma. De aquí se puden ver dos cosas intereantes, la primera es la alta frecuencia de metodos con tamaño "pequeño" en comparación con todo el resto. La segunda es como hay pocas peticiones que tienen un tamaño exageradamente grande en comparación con el resto de peticiones, miden casi el doble.
+Este histograma muestra la frecuencia del tamaño de las peticiones. Como había algunas peticiones con size "indeterminado" estas no han sido consideradas para la creación del histograma. De aquí se pueden ver dos cosas interesantes, la primera es la alta frecuencia de metodos con tamaño "pequeño" en comparación con todo el resto. La segunda es como hay pocas peticiones que tienen un tamaño exageradamente grande en comparación con el resto de peticiones, miden casi el doble.
 
 #### 7.
 
@@ -303,7 +317,7 @@ if (FALSE) {
 
 ```
 
-Ahora processamos **method** y **status**. Para transformarlos a datos numéricos usaremos one hot encoding. Hacemos lo mismo para la columna **type** y descartamos as columnas que no necessitamos.
+Ahora procesamos **method** y **status**. Para transformarlos a datos numéricos usaremos one hot encoding. Hacemos lo mismo para la columna **type** y descartamos as columnas que no necesitamos.
 
 ```{r}
 
@@ -409,7 +423,7 @@ for (j in 1:len_clusters) {
 
 ```
 
-Ahora mostramos los graficos.
+Ahora mostramos los gráficos.
 
 ```{r}
 # k = 2
